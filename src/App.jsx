@@ -19,10 +19,25 @@ export const App = () => {
   }
 
   return (
-    <ul>
-      {countries.map((country) => (
-        <li key={country.name}>{country.name}</li>
-      ))}
-    </ul>
+    <div className="overflow-x-auto">
+      <button
+  class="inline-block cursor-pointer rounded-md bg-gray-800 px-4 py-3 text-center text-sm font-semibold uppercase text-white transition duration-200 ease-in-out hover:bg-gray-900">
+  Button
+</button>
+        <table className="table table-zebra">
+          <thead>
+            <tr>
+              <th>Country Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {countries.map((country) => (
+              <tr key={country.name}>
+                <td>{country.name}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+    </div>
   );
 }
