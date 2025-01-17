@@ -5,6 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    hmr: false, // Disables Fast Refresh
+    //hmr: false, // Disables Fast Refresh
   },
 })
