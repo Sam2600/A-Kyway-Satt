@@ -25,6 +25,8 @@ export const Login = () => {
     //
     setLoading(true);
 
+    let { email, password } = data;
+  
     let response = await supabase.auth.signInWithPassword({ email, password });
 
     console.log(response);
@@ -45,24 +47,64 @@ export const Login = () => {
         <Typography variant="h4" className="text-center mb-4">
           Login
         </Typography>
-        <div className="space-y-4">
+        <form className="space-y-4" method="POST" onSubmit={handleSubmit(onSubmit, onError)}>
           <Input
             label="Email"
             size="lg"
             type="email"
+            {...register("email", {
+              required: {
+                value: true,
+                message: "Email is required",
+              },
+
+              pattern: {
+                value:
+                  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+                message: "Please enter a valid email format",
+              },
+
+              // Validate for multiple conditions
+              validate: {
+                notAdmin: (value) =>
+                  value !== "admin@gmail.com" ||
+                  "Please try with different email",
+                badDomain: (value) =>
+                  !value.endsWith("customMail.com") ||
+                  "Bad domain for email",
+                noScriptTags: (value) =>
+                  !/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi.test(
+                    value
+                  ) || "Script tags are not allowed",
+              },
+            })}
           />
           <Input
             label="Password"
             size="lg"
             type="password"
+            {...register("password", {
+              required: {
+                value: true,
+                message: "Password is required",
+              },
+
+              // Validate for multiple conditions
+              validate: {
+                tooShort: (value) =>
+                  value.length > 7 ||
+                  "Password too short",
+              },
+            })}
           />
           <Button
             size="lg"
             fullWidth
+            type="submit"
           >
             Login
           </Button>
-        </div>
+        </form>
         <Typography
           variant="small"
           className="text-center mt-4 text-gray-600"
