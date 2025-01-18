@@ -1,80 +1,75 @@
-import { NavLink } from "react-router-dom"
+import React, { useState } from "react";
+import { supabase } from "../../database/SupabaseClient"
+import {
+  Button,
+  Card,
+  Input,
+  Typography,
+} from "@material-tailwind/react";
+import { NavLink } from "react-router-dom";
+import { useForm } from "react-hook-form";
 
 export const Login = () => {
-      return (
-        <>
-          <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-              <img
-                alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-                className="mx-auto h-10 w-auto"
-              />
-              <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-                Sign in to your account
-              </h2>
-            </div>
-    
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-              <form action="#" method="POST" className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                    Email address
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      autoComplete="email"
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                    />
-                  </div>
-                </div>
-    
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
-                      Password
-                    </label>
-                    <div className="text-sm">
-                      <NavLink to={"#"} className="font-semibold text-indigo-600 hover:text-indigo-500">
-                        Forgot password?
-                      </NavLink>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      autoComplete="current-password"
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                    />
-                  </div>
-                </div>
-    
-                <div>
-                  <button
-                    type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    Sign in
-                  </button>
-                </div>
-              </form>
-    
-              <p className="mt-10 text-center text-sm/6 text-gray-500">
-                Not a member?{' '}
-                <NavLink to={"/register"} className="font-semibold text-indigo-600 hover:text-indigo-500">
-                  Register here
-                </NavLink>
-              </p>
-            </div>
-          </div>
-        </>
-      )
-  }
-  
+
+  // UseForm hook
+  const { register, formState, handleSubmit, reset } = useForm();
+
+  // Useful Form states
+  const { errors, isSubmitting } = formState;
+
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [serverError, setserverError] = useState("");
+
+  const onSubmit = async (data) => {
+    //
+    setLoading(true);
+
+    let response = await supabase.auth.signInWithPassword({ email, password });
+
+    console.log(response);
+  };
+
+  const onError = (errors, e) => {
+    setSuccess(false);
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-sm p-6">
+        <Typography variant="h4" className="text-center mb-4">
+          Login
+        </Typography>
+        <div className="space-y-4">
+          <Input
+            label="Email"
+            size="lg"
+            type="email"
+          />
+          <Input
+            label="Password"
+            size="lg"
+            type="password"
+          />
+          <Button
+            size="lg"
+            fullWidth
+          >
+            Login
+          </Button>
+        </div>
+        <Typography
+          variant="small"
+          className="text-center mt-4 text-gray-600"
+        >
+          Not a member? {" "} <NavLink className="hover:underline text-blue-500" to={"/register"}>{" Sign up "}</NavLink>
+        </Typography>
+      </Card> 
+    </div>
+  );
+}
