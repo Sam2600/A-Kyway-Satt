@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import {
@@ -18,10 +17,7 @@ import {
   Tooltip,
 } from "@material-tailwind/react";
 import { NavLink } from "react-router-dom";
-
-const supabase_prj_url = import.meta.env.VITE_SUPABASE_PRJ_URL;
-const supabase_prj_key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabase_prj_url, supabase_prj_key);
+import {supabase} from "../../database/SupabaseClient"
 
 const TABS = [
   {
@@ -45,7 +41,7 @@ export const DebtList = () => {
   const [search, setSearch] = useState("");
   const [debtList, setDebtList] = useState([]);
 
-  const getCountries = async () => {
+  const getDebtList = async () => {
     const { data } = await supabase.from("debts").select(`
       id,
       from:pay_from_user_id(name),
@@ -58,7 +54,13 @@ export const DebtList = () => {
   };
 
   useEffect(() => {
-    getCountries();
+    /**
+     * @date 2025/01/17
+     * @desctiption This is temporary code to reduce db fetching
+     */
+    if (!debtList.length) {
+      getDebtList();
+    }
   }, [search]);
 
   return (
