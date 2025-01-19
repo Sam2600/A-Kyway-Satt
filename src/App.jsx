@@ -1,22 +1,46 @@
-import React, { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { NavigationBar } from './components/NavigationBar';
-import { useCheckAuth } from './hooks/useCheckAuth';
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { supabase } from "./database/SupabaseClient";
+import { Outlet, useNavigate } from "react-router-dom";
+import { NavigationBar } from "./components/NavigationBar";
+import { storeAuthSession } from "./states/features/auth/authSlice";
 
 export const App = () => {
   const navigate = useNavigate();
-  const isAuthenticated = useCheckAuth();
+  const dispatch = useDispatch();
 
-  // Redirect if not authenticated
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-    }
-  }, [isAuthenticated, navigate]);
+    //
+    supabase.auth.getSession().then(
+      ({
+        data: {
+          session: { user },
+        },
+      }) => {
+        if (user) {
+          dispatch(storeAuthSession(user));
+        } else {
+          dispatch(storeAuthSession(null));
+          localStorage.clear();
+          navigate("/login");
+        }
+      }
+    );
 
-  if (!isAuthenticated) {
-    return null; // Avoid rendering anything until navigation completes
-  }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        dispatch(storeAuthSession(session));
+      } else {
+        dispatch(storeAuthSession(null));
+        navigate("/login");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [dispatch, navigate]);
 
   return (
     <>
