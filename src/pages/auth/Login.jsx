@@ -39,16 +39,23 @@ export const Login = () => {
     //
     let { email, password } = data;
 
-    await supabase.auth.signInWithPassword({ email, password })
-      .then(response => response?.data)
-      .then(data => {
-        dispatch(storeAuthSession(data?.user))
-        navigate("/");
+    await supabase.auth
+      .signInWithPassword({ email, password })
+      .then((response) => {
+        //
+        if (response?.error !== null) {
+          setserverError(response?.error?.message);
+        } else {
+          const user = response?.data?.user;
+          dispatch(storeAuthSession(user));
+          navigate("/");
+        }
       })
-      .catch(error => {
-          setserverError(error?.message);
-          scrollToTop();
-        });
+      .catch((error) => {
+        console.log(error?.message);
+        setserverError(error?.message);
+        scrollToTop();
+      });
   };
 
   return (
@@ -147,12 +154,6 @@ export const Login = () => {
                 required: {
                   value: true,
                   message: "Password is required",
-                },
-
-                // Validate for multiple conditions
-                validate: {
-                  tooShort: (value) =>
-                    value.length > 7 || "Password is too short",
                 },
               })}
             />
