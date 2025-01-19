@@ -5,11 +5,13 @@ import { Register } from '../pages/auth/Register';
 import { DebtList } from '../pages/debts/DebtList';
 import {createBrowserRouter, redirect} from "react-router-dom";
 import { AddDebt } from '../pages/debts/AddDebt';
+import { ErrorPage } from '../pages/error/ErrorPage';
 
 export const Router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
+        errorElement: <ErrorPage />,
         children: [
             {
                 index: true,
