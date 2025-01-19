@@ -12,35 +12,38 @@ import {
   Collapse,
   ListItem,
 } from "@material-tailwind/react";
-import { ChevronDownIcon, Cog6ToothIcon, InboxArrowDownIcon, PowerIcon, UserCircleIcon } from "@heroicons/react/24/outline";
-import { CircleStackIcon, HomeIcon, PlusCircleIcon } from "@heroicons/react/16/solid";
-import { NavLink } from "react-router-dom";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  CircleStackIcon,
+  HomeIcon,
+  PlusCircleIcon,
+} from "@heroicons/react/16/solid";
+import { NavLink, useNavigate } from "react-router-dom";
+import { supabase } from "../database/SupabaseClient";
+import { profileMenuItems } from "../constants/profileMenuItem";
 
-// profile menu component
-const profileMenuItems = [
-  {
-    label: "My Profile",
-    icon: UserCircleIcon,
-  },
-  {
-    label: "Edit Profile",
-    icon: Cog6ToothIcon,
-  },
-  {
-    label: "Inbox",
-    icon: InboxArrowDownIcon,
-  },
-  {
-    label: "Sign Out",
-    icon: PowerIcon,
-  },
-];
-
-function ProfileMenu() {
-
+const ProfileMenu = () => {
+  //
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  const navigate = useNavigate();
+
+  const handleSignOut = async (bool, to) => {
+    if (bool) {
+      const { error } = await supabase.auth.signOut();
+      localStorage.clear();
+      error && console.log(error);
+    } else {
+      navigate(to);
+    }
+  };
+
+  const handleClickMenuItem = (isLastItem, to) => {
+    handleSignOut(isLastItem, to);
+    closeMenu();
+  };
 
   return (
     <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
@@ -66,12 +69,12 @@ function ProfileMenu() {
         </Button>
       </MenuHandler>
       <MenuList className="p-1">
-        {profileMenuItems.map(({ label, icon }, key) => {
+        {profileMenuItems?.map(({ label, icon, to }, key) => {
           const isLastItem = key === profileMenuItems.length - 1;
           return (
             <MenuItem
               key={label}
-              onClick={closeMenu}
+              onClick={() => handleClickMenuItem(isLastItem, to)}
               className={`flex items-center gap-2 rounded ${
                 isLastItem
                   ? "hover:bg-red-500/10 focus:bg-red-500/10 active:bg-red-500/10"
@@ -96,7 +99,7 @@ function ProfileMenu() {
       </MenuList>
     </Menu>
   );
-}
+};
 
 export const NavigationBar = () => {
   const [openNav, setOpenNav] = useState(false);
@@ -104,7 +107,7 @@ export const NavigationBar = () => {
   useEffect(() => {
     window.addEventListener(
       "resize",
-      () => window.innerWidth >= 960 && setOpenNav(false),
+      () => window.innerWidth >= 960 && setOpenNav(false)
     );
   }, []);
 
@@ -120,7 +123,7 @@ export const NavigationBar = () => {
           <NavLink to={"/debt-list"} className="flex items-center">
             <CircleStackIcon
               strokeWidth={2}
-              className={`h-4 w-4 transition-transform mr-1`}  
+              className={`h-4 w-4 transition-transform mr-1`}
             />
             Debt List
           </NavLink>
@@ -147,65 +150,67 @@ export const NavigationBar = () => {
 
   return (
     <Navbar className="sticky top-0 z-10 h-max max-w-full rounded-none px-4 py-2 lg:px-8 lg:py-4">
-        <div className="flex items-center justify-between text-blue-gray-900">
-          <Typography
-            as="a"
-            href="/debt-list"
-            variant="h6"
-            color="blue-gray"
-            className="font-bold flex items-center"
-          >
+      <div className="flex items-center justify-between text-blue-gray-900">
+        <Typography
+          as="span"
+          href="/debt-list"
+          variant="h6"
+          color="blue-gray"
+          className="font-bold"
+        >
+          <NavLink to={"/"} className="flex items-center">
             <HomeIcon
               strokeWidth={2}
               className={`h-4 w-4 transition-transform mr-1`}
             />
             Home
-          </Typography>
-          <div className="flex items-center gap-4">
-            <div className="mr-4 hidden lg:block">{navList}</div>
-            <IconButton
-              variant="text"
-              className="ml-auto h-6 w-6 text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent lg:hidden"
-              ripple={false}
-              onClick={() => setOpenNav(!openNav)}
-            >
-              {openNav ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  className="h-6 w-6"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
+          </NavLink>
+        </Typography>
+        <div className="flex items-center gap-4">
+          <div className="mr-4 hidden lg:block">{navList}</div>
+          <IconButton
+            variant="text"
+            className="ml-auto h-6 w-6 text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent lg:hidden"
+            ripple={false}
+            onClick={() => setOpenNav(!openNav)}
+          >
+            {openNav ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            )}
           </IconButton>
           <ProfileMenu />
-          </div>
         </div>
-        <Collapse open={openNav}>
-          {navList}
-          {/* <div className="flex items-center gap-x-1">
+      </div>
+      <Collapse open={openNav}>
+        {navList}
+        {/* <div className="flex items-center gap-x-1">
             <Button fullWidth variant="text" size="sm" className="">
               <span>Log In</span>
             </Button>
@@ -213,7 +218,7 @@ export const NavigationBar = () => {
               <span>Sign in</span>
             </Button>
           </div> */}
-        </Collapse>
+      </Collapse>
     </Navbar>
   );
-}
+};
