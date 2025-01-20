@@ -42,7 +42,6 @@ export const Register = () => {
     let { name, email, password } = data;
 
     let options = {
-      emailRedirectTo: EMAIL_REDIRECT_URL,
       data: {
         name: name,
       },
