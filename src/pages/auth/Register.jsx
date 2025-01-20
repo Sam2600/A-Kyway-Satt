@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { storeAuthSession } from "../../states/features/auth/authSlice";
 import { scrollToTop } from "../../utils/helper_functions/helper";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
+import { EMAIL_REDIRECT_URL } from "../../constants/const.email";
 
 export const Register = () => {
   //
@@ -41,6 +42,7 @@ export const Register = () => {
     let { name, email, password } = data;
 
     let options = {
+      emailRedirectTo: EMAIL_REDIRECT_URL,
       data: {
         name: name,
       },

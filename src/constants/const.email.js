@@ -1,0 +1,1 @@
+export const EMAIL_REDIRECT_URL = import.meta.env.VITE_SUPABASE_REDIERCT_URL;
