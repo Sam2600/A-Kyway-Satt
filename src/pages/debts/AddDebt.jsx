@@ -3,6 +3,7 @@ import {
    Input,
    Button,
    Typography,
+   Spinner,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import { scrollToTop } from "../../utils/helper_functions/helper";
@@ -60,10 +61,12 @@ export const AddDebt = () => {
       }
    }, [search]);
 
+
+   const [success, setSuccess] = useState("");
    const [serverError, setserverError] = useState("");
 
    // UseForm hook
-   const { register, formState, control, handleSubmit } = useForm();
+   const { register, formState, handleSubmit, reset } = useForm();
 
    // Useful Form states
    const { errors, isSubmitting } = formState;
@@ -86,6 +89,9 @@ export const AddDebt = () => {
       if (error?.message && error?.code) {
          console.log(error);
          setserverError(error?.message);
+      } else {
+         setSuccess("Debt is created successfully");
+         reset();
       }
    };
 
@@ -97,29 +103,43 @@ export const AddDebt = () => {
          <Typography color="gray" className="mt-1 font-normal">
          Make beautiful debt history with your friends {":)"}
          </Typography>
+         {serverError && (
+            <p className="text-white bg-red-500 p-3 mt-6 rounded-md">
+               {serverError}
+            </p>
+         )}
+         {success && (
+            <p className="text-white bg-green-500 p-3 mt-6 rounded-md">
+               {success}
+            </p>
+         )}
          <form
          method="POST"
          onSubmit={handleSubmit(onSubmit, onError)}
          className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96"
          >
          <div className="mb-8 flex flex-col gap-6">
-            <Typography variant="h6" color="blue-gray" className="-mb-3">
+            <Typography variant="h6" color="blue-gray" className="-mb-3 flex justify-between">
                Taker Name
+               <p className="block font-semibold mb-[2px] text-red-500">
+                  {errors?.pay_from_user_id?.message}
+               </p>
             </Typography>
-            <Controller
-               name="pay_from_user_id"
-               control={control}
-               render={({ field }) => (
-               <select
-                  className="peer w-full h-full bg-transparent text-blue-gray-700 font-sans font-normal outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 disabled:cursor-not-allowed transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 border focus:border-2 border-t-transparent focus:border-t-transparent placeholder:opacity-0 focus:placeholder:opacity-100 text-sm px-3 py-3 rounded-md border-blue-gray-200 focus:border-gray-900 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                  {...field}
-                  >
-                  <option value=""></option>
-                     {userList?.map((user) => {
-                     
-                     if (user?.id == me?.id) return null;
-                        
-                     return (
+            <select
+               className="peer w-full h-full bg-transparent text-blue-gray-700 font-sans font-normal outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 disabled:cursor-not-allowed transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 border focus:border-2 border-t-transparent focus:border-t-transparent placeholder:opacity-0 focus:placeholder:opacity-100 text-sm px-3 py-3 rounded-md border-blue-gray-200 focus:border-gray-900 !border-t-blue-gray-200 focus:!border-t-gray-900"
+               {...register("pay_from_user_id", {
+                  required: {
+                     value: true,
+                     message: "Debt taker is required",
+                  },
+               })}
+            >
+               <option value=""></option>
+               {userList?.map((user) => {
+
+                  if (user?.id == me?.id) return null;
+
+                  return (
                      <option
                         className="pt-[9px] pb-2 px-3 rounded-md leading-tight cursor-pointer select-none hover:bg-blue-gray-50 focus:bg-blue-gray-50 hover:bg-opacity-80 focus:bg-opacity-80 hover:text-blue-gray-900 focus:text-blue-gray-900 outline outline-0 transition-all"
                         key={user?.id}
@@ -127,39 +147,45 @@ export const AddDebt = () => {
                      >
                         {user?.name}
                      </option>
-                     );
-                  })}
-               </select>
-               )}
-            />
-
-            <Typography variant="h6" color="blue-gray" className="-mb-3">
+                  );
+               })}
+            </select>
+            <Typography variant="h6" color="blue-gray" className="-mb-3 flex justify-between">
                Item
+               <p className="block font-semibold mb-[2px] text-red-500">
+                  {errors?.item_id?.message}
+               </p>
             </Typography>
-            <Controller
-               name="item_id"
-               control={control}
-               render={({ field }) => (
-               <select
-                  className="peer w-full h-full bg-transparent text-blue-gray-700 font-sans font-normal outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 disabled:cursor-not-allowed transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 border focus:border-2 border-t-transparent focus:border-t-transparent placeholder:opacity-0 focus:placeholder:opacity-100 text-sm px-3 py-3 rounded-md border-blue-gray-200 focus:border-gray-900 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                  {...field}
-                  >
-                  <option value=""></option>
-                  {itemList?.map((item) => {
-                     return (
-                     <option key={item?.id} value={item?.id?.toString()}>
-                        {item?.name}
-                     </option>
-                     );
-                  })}
-               </select>
-               )}
-            />
-            <Typography variant="h6" color="blue-gray" className="-mb-3">
-               Amount
+            <select
+               className="peer w-full h-full bg-transparent text-blue-gray-700 font-sans font-normal outline outline-0 focus:outline-0 disabled:bg-blue-gray-50 disabled:border-0 disabled:cursor-not-allowed transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 border focus:border-2 border-t-transparent focus:border-t-transparent placeholder:opacity-0 focus:placeholder:opacity-100 text-sm px-3 py-3 rounded-md border-blue-gray-200 focus:border-gray-900 !border-t-blue-gray-200 focus:!border-t-gray-900"
+               {...register("item_id", {
+                  required: {
+                     value: true,
+                     message: "Item is required",
+                  },
+               })}
+            >
+               <option value=""></option>
+               {itemList?.map((item) => {
+                  return (
+                  <option key={item?.id} value={item?.id?.toString()}>
+                     {item?.name}
+                  </option>
+                  );
+               })}
+            </select>
+            <Typography variant="h6" color="blue-gray" className="-mb-3 flex justify-between">
+                  Amount
+                  <p className="block font-semibold mb-[2px] text-red-500">
+                  {errors?.amount?.message}
+               </p>
             </Typography>
             <Input
                {...register("amount", {
+                  required: {
+                  value: true,
+                  message: "Amount is required"
+               },
                pattern: {
                   value: /^\d+$/,
                   message: "Only numeric characters are allowed",
@@ -173,8 +199,8 @@ export const AddDebt = () => {
                }}
             />
          </div>
-         <Button type="submit" className="mt-6" fullWidth>
-            Register
+         <Button disabled={isSubmitting} type="submit" className="mt-6 flex justify-center items-center" fullWidth>
+            {isSubmitting ? <Spinner /> : "REGISTER"}
          </Button>
          </form>
       </Card>
