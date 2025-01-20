@@ -72,7 +72,11 @@ export const Register = () => {
             Have fun taking debt note {":)"}
           </Typography>
         </div>
-
+        {serverError && (
+          <p className="text-white bg-red-500 p-3 -mt-5 mb-9 rounded-md">
+            {serverError}
+          </p>
+        )}
         <form
           className="space-y-4"
           method="POST"
