@@ -18,19 +18,31 @@ import {
 } from "@material-tailwind/react";
 import { NavLink } from "react-router-dom";
 import {supabase} from "../../database/SupabaseClient"
+import { set } from "react-hook-form";
 
 const TABS = [
   {
-    label: "All",
-    value: "all",
-  },
-  {
-    label: "Paid",
-    value: "paid",
+    label: "Done",
+    value: 1,
   },
   {
     label: "UnPaid",
-    value: "unpaid",
+    value: 0,
+  },
+];
+
+const DEBT_TABS = [
+  {
+    label: "All",
+    value: 1,
+  },
+  {
+    label: "Get Debt",
+    value: 2,
+  },
+  {
+    label: "Pay Debt",
+    value: 3,
   },
 ];
 
@@ -38,8 +50,10 @@ const TABLE_HEAD= ["No", "Owner", "Taker", "Item", "Amount", "Status", "Action"]
 
 export const DebtList = () => {
 
-  const [search, setSearch] = useState("");
+  const [me, setMe] = useState("");
+  const [current, setCurrent] = useState(1);
   const [debtList, setDebtList] = useState([]);
+  const [filteredDebtList, setFilteredDebtList] = useState([]);
 
   const getDebtList = async () => {
 
@@ -57,14 +71,36 @@ export const DebtList = () => {
      */
     const { data } = await supabase.from("debts").select(`
       id,
-      from:pay_from_user_id(name),
-      to:pay_to_user_id(name),
+      from:pay_from_user_id(id, name),
+      to:pay_to_user_id(id, name),
       item:item_id(name),
       amount,
       status
-    `).eq("pay_to_user_id", id);
-    setDebtList(data);
+    `).or(`pay_to_user_id.eq.${id}, pay_from_user_id.eq.${id}`);
+
+      setMe(id);
+      setDebtList(data);
+      setFilteredDebtList(data);
   };
+
+  const handleFilterDebt = (value, me) => {
+    setCurrent(value);
+    switch (value) {
+      case 2:
+        setFilteredDebtList(debtList.filter((debt) => debt?.to?.id == me));
+        break;
+      case 3:
+        setFilteredDebtList(debtList.filter((debt) => debt?.to?.id != me));
+        break;
+      default:
+        setFilteredDebtList(debtList);
+        break;
+    }
+  }
+
+  const handleFilterDebtWithStatus = (value) => {
+    /**@todo later */
+  }
 
   useEffect(() => {
     /**
@@ -74,7 +110,7 @@ export const DebtList = () => {
     if (!debtList.length) {
       getDebtList();
     }
-  }, [search]);
+  }, []);
 
   return (
     <Card className="h-full w-full border border-gray-400 rounded-lg">
@@ -89,9 +125,6 @@ export const DebtList = () => {
             </Typography>
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-            <Button variant="outlined" size="sm">
-              view all
-            </Button>
             <NavLink className="flex items-center gap-2" to={"/add-debt"}>
               <Button size="sm" className="flex justify-between gap-x-2">
                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add Debt
@@ -100,15 +133,26 @@ export const DebtList = () => {
           </div>
         </div>
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <Tabs value="all" className="w-full -z-0 md:w-max">
-            <TabsHeader>
-              {TABS.map(({ label, value }) => (
-                <Tab key={value} value={value}>
-                  &nbsp;&nbsp;{label}&nbsp;&nbsp;
-                </Tab>
-              ))}
-            </TabsHeader>
-          </Tabs>
+          <div className="flex gap-4 w-full md:w-4/6">
+            <Tabs value={1} className="w-full -z-0 md:w-2/6">
+              <TabsHeader>
+                {TABS.map(({ label, value }) => (
+                  <Tab disabled onClick={() => handleFilterDebtWithStatus(value)} key={value} value={value}>
+                    &nbsp;&nbsp;{label}&nbsp;&nbsp;
+                  </Tab>
+                ))}
+              </TabsHeader>
+            </Tabs>
+            <Tabs value={current} className="w-full -z-0 md:w-3/6">
+              <TabsHeader>
+                {DEBT_TABS.map(({ label, value }) => (
+                  <Tab onClick={() => handleFilterDebt(value, me)} key={value} value={value}>
+                    &nbsp;&nbsp;{label}&nbsp;&nbsp;
+                  </Tab>
+                ))}
+              </TabsHeader>
+            </Tabs>
+          </div>
           <div className="w-full md:w-72">
             <Input
               label="Search"
@@ -139,8 +183,8 @@ export const DebtList = () => {
             </tr>
           </thead>
           <tbody>
-            {debtList?.map((debt, index) => {
-              const isLast = index === debtList.length - 1;
+            {filteredDebtList?.map((debt, index) => {
+              const isLast = index === filteredDebtList.length - 1;
               const classes = isLast
                 ? "p-4"
                 : "p-4 border-b border-blue-gray-50";
