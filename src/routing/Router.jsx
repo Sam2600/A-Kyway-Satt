@@ -6,6 +6,7 @@ import { DebtList } from '../pages/debts/DebtList';
 import {createBrowserRouter, redirect} from "react-router-dom";
 import { AddDebt } from '../pages/debts/AddDebt';
 import { ErrorPage } from '../pages/error/ErrorPage';
+import { NotFound } from '../pages/notFound/NotFound';
 
 export const Router = createBrowserRouter([
     {
@@ -24,7 +25,8 @@ export const Router = createBrowserRouter([
             {
                 path: "/add-debt",
                 element: <AddDebt />
-            }
+            },
+            
         ]
     },
     {
@@ -34,5 +36,9 @@ export const Router = createBrowserRouter([
     {
         path: "/login",
         element: <Login />,
+    },
+    {
+        path: "/*",
+        element: <NotFound />
     },
 ]);
