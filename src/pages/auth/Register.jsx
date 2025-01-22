@@ -20,12 +20,13 @@ export const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [success, setSuccess] = useState("");
   const [serverError, setserverError] = useState("");
   const [passwordShown, setPasswordShown] = useState(false);
   const togglePasswordVisiblity = () => setPasswordShown((cur) => !cur);
 
   // UseForm hook
-  const { register, formState, handleSubmit, watch } = useForm();
+  const { register, formState, handleSubmit, watch, reset } = useForm();
 
   // Useful Form states
   const { errors, isSubmitting } = formState;
@@ -58,7 +59,8 @@ export const Register = () => {
       scrollToTop();
     } else {
       dispatch(storeAuthSession(response?.data?.session));
-      navigate("/login");
+      setSuccess("Registered successfully. Please check mail");
+      reset();
     }
   };
 
@@ -74,8 +76,13 @@ export const Register = () => {
           </Typography>
         </div>
         {serverError && (
-          <p className="text-white bg-red-500 p-3 -mt-5 mb-9 rounded-md">
+          <p className="text-white text-center bg-red-500 p-3 -mt-5 mb-9 rounded-md">
             {serverError}
+          </p>
+        )}
+        {success && (
+          <p className="text-white text-center bg-green-500 p-3 -mt-5 mb-9 rounded-md">
+            {success}
           </p>
         )}
         <form
