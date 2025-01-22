@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { PencilIcon, UserPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import {
   Card,
   CardHeader,
@@ -19,6 +19,8 @@ import {
 import { NavLink } from "react-router-dom";
 import { supabase } from "../../database/SupabaseClient";
 import { useDebounce } from "../../hooks/useDebounce";
+import { retry } from "@reduxjs/toolkit/query";
+import { scrollToTop } from "../../utils/helper_functions/helper";
 
 const PER_PAGE = 10;
 
@@ -64,6 +66,12 @@ export const DebtList = () => {
 
   // debt search keyword
   const [search, setSearch] = useState("");
+
+  // success message
+  const [serverMessage, setServerMessage] = useState({
+    status: false,
+    message: "",
+  });
 
   // (all, get, pay) debt types
   const [debtType, setDebtType] = useState(1);
@@ -135,11 +143,38 @@ export const DebtList = () => {
         break;
     }
 
-    const { data } = await query.range(range?.from, range?.to);
+    const { data } = await query.is("deleted_at", null).range(range?.from, range?.to);
 
     setMe(id);
     setDebtList(data);
   };
+
+  const handleRemoveDebt = async (id) => {
+    
+    const { error } = await supabase.from('debts')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+    
+    if (error) {
+
+      console.error(error);
+      setServerMessage({
+        status: false,
+        message: "Debt remove failed",
+      });
+
+      scrollToTop();
+
+    } else {
+
+      setServerMessage({
+        status: true,
+        message: "Debt removed successfully"
+      });
+
+      scrollToTop();
+    }
+  }
 
   const handlePagination = (page) => {};
 
@@ -150,7 +185,15 @@ export const DebtList = () => {
   }, [debtType, debtStatus, _search]);
 
   return (
-    <Card className="h-full w-full border border-gray-400 rounded-lg">
+    <>
+      {
+        serverMessage?.message && (
+          <p className={`text-white text-center w-full sm:w-full md:w-5/12 lg:w-3/12 xl:w-3/12 ${serverMessage?.status ? "bg-green-500" : "bg-red-500"} p-3 mb-9 rounded-md`}>
+            {serverMessage?.message}
+          </p>
+        )
+      }
+      <Card className="h-full w-full border border-gray-400 rounded-lg">
       <CardHeader floated={false} shadow={false} className="rounded-none">
         <div className="flex flex-col md:flex-row md:justify-between mb-8 space-y-6 md:gap-8 md:items-center">
           <div>
@@ -214,25 +257,31 @@ export const DebtList = () => {
             <table className="mt-4 w-full min-w-max table-auto text-left">
               <thead>
                 <tr>
-                  {TABLE_HEAD.map((head) => (
-                    <th
-                      key={head}
-                      className="border border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                    >
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal leading-none opacity-70"
-                      >
-                        {head}
-                      </Typography>
-                    </th>
-                  ))}
+                  {TABLE_HEAD.map((head, index) => {
+
+                    // cuz we have an extra column for actions
+                    const isLast = index === debtList.length + 2;
+
+                    return (
+                        <th
+                        key={head}
+                        className={`border border-blue-gray-100 bg-blue-gray-50/50 p-4`}
+                        >
+                          <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className={`font-normal leading-none opacity-70 ${isLast ? "pl-6" : ""}`}
+                          >
+                            {head}
+                          </Typography>
+                        </th>
+                    )}
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {debtList?.map((debt, index) => {
-                  const isLast = index === debtList.length - 1;
+                  const isLast = index === debtList.length + 1;
                   const classes = isLast
                     ? "p-4 border"
                     : "p-4 border border-blue-gray-50";
@@ -346,12 +395,19 @@ export const DebtList = () => {
                           />
                         </div>
                       </td>
-                      <td className={classes}>
-                        <Tooltip content="Edit Debt">
-                          <IconButton disabled={true} variant="text">
-                            <PencilIcon className="h-4 w-4" />
-                          </IconButton>
-                        </Tooltip>
+                      <td className={`${classes}`}>
+                        <div className="pl-3 flex justify-start items-center">
+                          <Tooltip content="Edit Debt">
+                            <IconButton variant="text">
+                              <PencilIcon className="h-4 w-4" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip content="Remove Debt">
+                            <IconButton onClick={() => handleRemoveDebt(debt?.id)} variant="text">
+                              <TrashIcon className="h-4 w-4" />
+                            </IconButton>
+                          </Tooltip>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -385,5 +441,6 @@ export const DebtList = () => {
         </p>
       )}
     </Card>
+    </>
   );
 };
