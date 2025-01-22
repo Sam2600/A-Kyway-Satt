@@ -11,14 +11,23 @@ import {
 import { useEffect, useState } from "react";
 import { scrollToTop } from "../../utils/helper_functions/helper";
 import { supabase } from "../../database/SupabaseClient";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 export const AddDebt = () => {
    //
-   const [search, setSearch] = useState("");
    const [me, setMe] = useState({});
    const [userList, setUserList] = useState([]);
    const [itemList, setItemList] = useState([]);
+   
+   const [success, setSuccess] = useState("");
+   const [modelSuccess, setModelSuccess] = useState("");
+
+   const [serverError, setserverError] = useState("");
+   const [modelServerError, setModelServerError] = useState("");
+
+   const [open, setOpen] = useState(false);
+
+   const handleAddItem = () => setOpen((cur) => !cur);
 
    const getUsers = async () => {
       const { data, error } = await supabase.from("pub_users").select(`id, name`);
@@ -31,6 +40,7 @@ export const AddDebt = () => {
    };
 
    const getItems = async () => {
+      
       const { data, error } = await supabase.from("items").select(`id, name`);
       setItemList(data);
 
@@ -50,29 +60,9 @@ export const AddDebt = () => {
 
    useEffect(() => {
       getMe();
-
-      /**
-       * @date 2025/01/19
-       * @desctiption This is temporary code to reduce db fetching
-       */
-      if (!userList.length) {
-         getUsers();
-      }
-
-      if (!itemList.length) {
-         getItems();
-      }
-   }, [search]);
-
-
-   const [success, setSuccess] = useState("");
-   const [modelSuccess, setModelSuccess] = useState("");
-
-   const [serverError, setserverError] = useState("");
-   const [modelServerError, setModelServerError] = useState("");
-   
-   const [open, setOpen] = useState(false);
-   const handleAddItem = () => setOpen((cur) => !cur);
+      getUsers();
+      getItems();
+   }, []);
 
    // UseForm hook
    const { register, formState, handleSubmit, reset } = useForm();
@@ -82,6 +72,7 @@ export const AddDebt = () => {
       register: register2,
       formState: { errors: errors2 },
       handleSubmit: handleSubmit2,
+      reset: reset2
    } = useForm();
 
    // Useful Form states
@@ -118,14 +109,28 @@ export const AddDebt = () => {
       let { error } = await supabase.from("items").insert(data);
 
       if (error?.message && error?.code) {
+         // log the error
          console.log(error);
+         // clear normal form error
          setserverError("");
-         setModelServerError(error?.message);
+         // remove model form previous success
+         setModelSuccess("");
+         // add model form server response error message
+         setModelServerError("Internal Server Error");
+         // close the model
          handleAddItem();
       } else {
+         // clear normal form error
          setserverError("");
+         // remove model form previous error
+         setModelServerError("");
+         // add model form server success message
          setModelSuccess("Item is created successfully");
-         reset();
+         // clear the inputs
+         reset2();
+         // get the item list again
+         getItems();
+         //close the model
          handleAddItem();
       }
    }
@@ -142,7 +147,7 @@ export const AddDebt = () => {
          handler={handleAddItem}
          className="bg-transparent shadow-none"
       >
-         <form key={2} method="POST" onSubmit={handleSubmit2(onSubmit2, onError2)} className="w-full max-w-[24rem] mx-auto">
+         <form method="POST" onSubmit={handleSubmit2(onSubmit2, onError2)} className="w-full max-w-[24rem] mx-auto">
             <Card className="mx-auto w-full max-w-[24rem]">
                <CardBody className="flex flex-col gap-4">
                   <Typography className="text-center mb-2" variant="h4" color="blue-gray">
@@ -222,7 +227,6 @@ export const AddDebt = () => {
             </p>
          )}
          <form
-         key={1}
          method="POST"
          onSubmit={handleSubmit(onSubmit, onError)}
          className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96"
