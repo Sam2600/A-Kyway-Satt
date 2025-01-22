@@ -170,8 +170,8 @@ export const DebtList = () => {
           </div>
         </div>
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex-col space-y-5 gap-4 w-full md:w-4/6 lg:w-2/6">
-            <Tabs value={debtStatus} className="w-full -z-0 md:w-4/6 lg:w-4/6 xl:w-3/6">
+          <div className="flex-col space-y-5 gap-4 w-full -z-0 md:w-4/6 lg:w-2/6">
+            <Tabs value={debtStatus} className="w-full md:w-4/6 lg:w-4/6 xl:w-3/6">
               <TabsHeader className="bg-gray-300">
                 {TABS.map(({ label, value }) => (
                   <Tab
@@ -184,7 +184,7 @@ export const DebtList = () => {
                 ))}
               </TabsHeader>
             </Tabs>
-            <Tabs value={debtType} className="w-full -z-0 md:w-5/6 lg:w-5/6 xl:w-5/6  ">
+            <Tabs value={debtType} className="w-full md:w-5/6 lg:w-5/6 xl:w-5/6  ">
               <TabsHeader className="bg-gray-300">
                 {DEBT_TABS.map(({ label, value }) => (
                   <Tab
