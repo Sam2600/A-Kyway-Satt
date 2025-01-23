@@ -91,6 +91,7 @@ export const AddDebt = () => {
       console.log(e);
       console.log(errors);
       scrollToTop();
+      setModelSuccess("");
    };
 
    const onSubmit = async (data) => {
@@ -194,7 +195,7 @@ export const AddDebt = () => {
    );
 
    return (
-      <Card className="items-center" color="transparent" shadow={false}>
+      <Card className="items-center -mt-5" color="transparent" shadow={false}>
          <Typography variant="h4" color="blue-gray">
          Register Your Debt
          </Typography>
@@ -202,22 +203,22 @@ export const AddDebt = () => {
          Make beautiful debt history with your friends {":)"}
          </Typography>
          {serverError && (
-            <p className="text-white bg-red-500 p-3 mt-6 rounded-md">
+            <p className="text-white text-center bg-red-500 w-80 max-w-screen-lg sm:w-96 p-3 mt-6 rounded-md">
                {serverError}
             </p>
          )}
          {modelServerError && (
-            <p className="text-white bg-red-500 p-3 mt-6 rounded-md">
+            <p className="text-white text-center bg-red-500 w-80 max-w-screen-lg sm:w-96 p-3 mt-6 rounded-md">
                {modelServerError}
             </p>
          )}
          {success && (
-            <p className="text-white bg-green-500 p-3 mt-6 rounded-md">
+            <p className="text-white white text-center bg-green-500 w-80 max-w-screen-lg sm:w-96 p-3 mt-6 rounded-md">
                {success}
             </p>
          )}
          {modelSuccess && (
-            <p className="text-white bg-green-500 p-3 mt-6 rounded-md">
+            <p className="text-white text-center bg-green-500 w-80 max-w-screen-lg sm:w-96 p-3 mt-6 rounded-md">
                {modelSuccess}
             </p>
          )}
