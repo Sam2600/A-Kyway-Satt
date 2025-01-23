@@ -74,12 +74,12 @@ export const Register = () => {
           </Typography>
         </div>
         {serverError && (
-          <p className="text-white text-center bg-red-500 p-3 -mt-5 mb-9 rounded-md">
+          <p className="text-white text-center bg-red-500 p-3 mb-9 rounded-md">
             {serverError}
           </p>
         )}
         {success && (
-          <p className="text-white text-center bg-green-500 p-3 -mt-5 mb-9 rounded-md">
+          <p className="text-white text-center bg-green-500 p-3 mb-9 rounded-md">
             {success}
           </p>
         )}
