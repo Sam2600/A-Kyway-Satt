@@ -7,18 +7,16 @@ import {
   Typography,
   Spinner,
 } from "@material-tailwind/react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { storeAuthSession } from "../../states/features/auth/authSlice";
 import { scrollToTop } from "../../utils/helper_functions/helper";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
-import { EMAIL_REDIRECT_URL } from "../../constants/const.email";
 
 export const Register = () => {
   //
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [success, setSuccess] = useState("");
   const [serverError, setserverError] = useState("");
@@ -38,8 +36,7 @@ export const Register = () => {
   };
 
   const onSubmit = async (data) => {
-    //
-
+    // Destructure data
     let { name, email, password } = data;
 
     let options = {
@@ -61,6 +58,7 @@ export const Register = () => {
       dispatch(storeAuthSession(response?.data?.session));
       setSuccess("Registered successfully. Please check mail");
       reset();
+      scrollToTop();
     }
   };
 
@@ -71,7 +69,7 @@ export const Register = () => {
           <Typography variant="h3" color="blue-gray" className="mb-2">
             Register
           </Typography>
-          <Typography className="mb-8 text-gray-600 font-normal text-[18px]">
+          <Typography className="mb-8 text-gray-800 font-normal text-[18px]">
             Have fun taking debt note {":)"}
           </Typography>
         </div>
