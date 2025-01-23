@@ -82,6 +82,7 @@ export const AddDebt = () => {
       console.log(e);
       console.log(errors);
       scrollToTop();
+      setModelServerError("");
       setModelSuccess("");
    };
 
