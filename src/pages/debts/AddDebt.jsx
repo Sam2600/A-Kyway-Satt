@@ -99,10 +99,12 @@ export const AddDebt = () => {
          console.log(error);
          setModelServerError("");
          setserverError(error?.message);
+         scrollToTop();
       } else {
          setModelSuccess("");
          setSuccess("Debt is created successfully");
          reset();
+         scrollToTop();
       }
    };
 
