@@ -19,7 +19,6 @@ import {
 import { NavLink } from "react-router-dom";
 import { supabase } from "../../database/SupabaseClient";
 import { useDebounce } from "../../hooks/useDebounce";
-import { retry } from "@reduxjs/toolkit/query";
 import { scrollToTop } from "../../utils/helper_functions/helper";
 
 const PER_PAGE = 10;
@@ -437,7 +436,7 @@ export const DebtList = () => {
         </>
       ) : (
         <p className="text-center inline my-10 font-bold">
-          There is no debts. Try again {":("}
+          There is no debt to show {":("}
         </p>
       )}
     </Card>
