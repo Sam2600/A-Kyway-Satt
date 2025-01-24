@@ -26,7 +26,10 @@ export const Router = createBrowserRouter([
                 path: "/add-debt",
                 element: <AddDebt />
             },
-            
+            {
+                path: "/update-debt/:debt",
+                element: <AddDebt />
+            },
         ]
     },
     {
