@@ -7,13 +7,17 @@ import {
    Dialog,
    CardBody,
    CardFooter,
+   Radio,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import { scrollToTop } from "../../utils/helper_functions/helper";
 import { supabase } from "../../database/SupabaseClient";
 import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
 
 export const AddDebt = () => {
+
+   const { debt } = useParams();
    //
    const [me, setMe] = useState({});
    const [userList, setUserList] = useState([]);
@@ -58,15 +62,45 @@ export const AddDebt = () => {
          .then((session) => setMe(session?.user));
    };
 
+   const getDebtById = async () => {
+
+      const { data, error } = await supabase.from("debts").select(
+         `
+            id,
+            from:pay_from_user_id(id, name),
+            items!inner(
+               id,
+               name
+            ),
+            amount,
+            status
+         `
+      )
+      .eq("id", debt).single();
+      
+      if (error) {
+         console.log(error);
+      } else {
+         console.log(data);
+         setValue("id", data?.id);
+         setValue("pay_from_user_id", data?.from?.id);
+         setValue("item_id", data?.items?.id);
+         setValue("amount", data?.amount);
+      }
+   };
+
    useEffect(() => {
+      if (debt) {
+         getDebtById();
+      }
       getMe();
       getUsers();
       getItems();
    }, []);
 
    // UseForm hook
-   const { register, formState, handleSubmit, reset } = useForm();
-   
+   const { register, formState, handleSubmit, reset, setValue, getValues } = useForm();
+
    // UseForm hook for second model box form
    const {
       register: register2,
@@ -87,13 +121,26 @@ export const AddDebt = () => {
    };
 
    const onSubmit = async (data) => {
-      const updatData = {
+      let updatData = {
          ...data,
          pay_to_user_id: me?.id,
          updated_at: new Date().toISOString(), // Use the current timestamp in ISO 8601 format
       };
 
-      let { error } = await supabase.from("debts").insert(updatData);
+      if (!debt) { 
+         delete updatData.status;
+      }
+
+      let result;
+      let query = supabase.from("debts");
+
+      if (debt) {
+         result = await query.update(updatData).eq("id", debt);
+      } else {
+         result = await query.insert(updatData);
+      }
+
+      let { error } = result;
 
       if (error?.message && error?.code) {
          console.log(error);
@@ -102,7 +149,7 @@ export const AddDebt = () => {
          scrollToTop();
       } else {
          setModelSuccess("");
-         setSuccess("Debt is created successfully");
+         setSuccess(`Debt is ${debt ? "updated" : "created"} successfully`);
          reset();
          scrollToTop();
       }
@@ -205,7 +252,7 @@ export const AddDebt = () => {
    return (
       <Card className="items-center -mt-5" color="transparent" shadow={false}>
          <Typography variant="h4" color="blue-gray">
-         Register Your Debt
+         {`${debt ? "Update " : "Register "} Your Debt`}
          </Typography>
          <Typography color="gray" className="mt-1 font-normal">
          Make beautiful debt history with your friends {":)"}
@@ -317,10 +364,17 @@ export const AddDebt = () => {
                labelProps={{
                className: "before:content-none after:content-none",
                }}
-            />
+               />
+            {
+               debt &&
+                  <div className="flex gap-10">
+                     <Radio {...register("status")} value={true} label="Done" defaultChecked={true == getValues()?.sataus} />
+                     <Radio {...register("status")} value={false} label="Not Yet" defaultChecked={true != getValues()?.sataus} />
+                  </div>      
+            }
          </div>
          <Button disabled={isSubmitting} type="submit" className="mt-6 flex justify-center items-center" fullWidth>
-            {isSubmitting ? <Spinner /> : "REGISTER"}
+            {isSubmitting ? <Spinner /> : debt ? "UPDATE" : "REGISTER"}
          </Button>
          </form>
          {addItemModel}
