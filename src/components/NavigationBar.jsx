@@ -113,39 +113,39 @@ export const NavigationBar = () => {
   }, []);
 
   const navList = (
-    <ul className="mt-2 mb-4 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="font-bold"
-      >
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          <NavLink to={"/debt-list"} className="flex items-center">
-            <CircleStackIcon
-              strokeWidth={2}
-              className={`h-4 w-4 transition-transform mr-1`}
-            />
-            Debt List
-          </NavLink>
-        </ListItem>
-      </Typography>
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="font-bold"
-      >
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          <NavLink to={"/add-debt"} className="flex items-center">
-            <PlusCircleIcon
-              strokeWidth={2}
-              className={`h-4 w-4 transition-transform mr-1`}
-            />
-            Add Debt
-          </NavLink>
-        </ListItem>
-      </Typography>
+    <ul className="mt-2 mb-4 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center">
+      <NavLink to={"/debt-list"} className="flex items-center">
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="font-bold"
+        >
+          <ListItem className="flex items-center gap-1">
+              <CircleStackIcon
+                strokeWidth={2}
+                className={`h-4 w-4 transition-transform mr-1`}
+              />
+              Debt List
+          </ListItem>
+        </Typography>
+      </NavLink>
+      <NavLink to={"/add-debt"} className="flex items-center">
+        <Typography
+          as="li"
+          variant="small"
+          color="blue-gray"
+          className="font-bold"
+        >
+          <ListItem className="flex items-center gap-1">
+              <PlusCircleIcon
+                strokeWidth={2}
+                className={`h-4 w-4 transition-transform mr-1`}
+              />
+              Add Debt
+          </ListItem>
+        </Typography>
+      </NavLink>
     </ul>
   );
 
