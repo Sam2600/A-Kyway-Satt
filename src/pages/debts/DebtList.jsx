@@ -15,6 +15,10 @@ import {
   Tab,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@material-tailwind/react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "../../database/SupabaseClient";
@@ -65,6 +69,11 @@ export const DebtList = () => {
 
   // debt search keyword
   const [search, setSearch] = useState("");
+
+  // model open state
+  const [open, setOpen] = useState(false);
+
+  const [rmId, setRmId] = useState(null);
 
   // success message
   const [serverMessage, setServerMessage] = useState({
@@ -148,14 +157,16 @@ export const DebtList = () => {
     setDebtList(data);
   };
 
-  const handleRemoveDebt = async (id) => {
-    
+  const handleRemoveDebt = async () => {
+
+    if (!rmId) return;
+
     const { error } = await supabase.from('debts')
       .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id)
+      .eq('id', rmId)
     
     if (error) {
-
+      setOpen(false);
       console.error(error);
       setServerMessage({
         status: false,
@@ -165,14 +176,19 @@ export const DebtList = () => {
       scrollToTop();
 
     } else {
-
+      setOpen(false);
       setServerMessage({
         status: true,
         message: "Debt removed successfully"
       });
-
+      getDebtList(search);
       scrollToTop();
     }
+  }
+
+  const handleOpen = (id) => {
+    setRmId(id);
+    setOpen(!open)
   }
 
   const handlePagination = (page) => {};
@@ -183,8 +199,31 @@ export const DebtList = () => {
     getDebtList(_search);
   }, [debtType, debtStatus, _search]);
 
+  const ConfirmRemove = (
+      <Dialog size="xs" open={open} handler={handleOpen}>
+        <DialogHeader>Confirmation</DialogHeader>
+        <DialogBody>
+          Are you sure you want to remove this debt?
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="red"
+            onClick={handleOpen}
+            className="mr-1"
+          >
+            <span>Cancel</span>
+          </Button>
+          <Button variant="gradient" color="green" onClick={handleRemoveDebt}>
+            <span>Confirm</span>
+          </Button>
+        </DialogFooter>
+      </Dialog>
+  );
+
   return (
     <>
+      {ConfirmRemove}
       {
         serverMessage?.message && (
           <p className={`text-white text-center w-full sm:w-full md:w-5/12 lg:w-3/12 xl:w-3/12 ${serverMessage?.status ? "bg-green-500" : "bg-red-500"} p-3 mb-9 rounded-md`}>
@@ -259,7 +298,7 @@ export const DebtList = () => {
                   {TABLE_HEAD.map((head, index) => {
 
                     // cuz we have an extra column for actions
-                    const isLast = index === debtList.length + 2;
+                    const isLast = index === TABLE_HEAD.length - 1;
 
                     return (
                         <th
@@ -397,12 +436,14 @@ export const DebtList = () => {
                       <td className={`${classes}`}>
                         <div className="pl-3 flex justify-start items-center">
                           <Tooltip content="Edit Debt">
-                            <IconButton variant="text">
-                              <PencilIcon className="h-4 w-4" />
-                            </IconButton>
+                            <NavLink to={`/update-debt/${debt?.id}`}>
+                              <IconButton variant="text">
+                                <PencilIcon className="h-4 w-4" />
+                              </IconButton>
+                            </NavLink>
                           </Tooltip>
                           <Tooltip content="Remove Debt">
-                            <IconButton onClick={() => handleRemoveDebt(debt?.id)} variant="text">
+                            <IconButton onClick={() => handleOpen(debt?.id)} variant="text">
                               <TrashIcon className="h-4 w-4" />
                             </IconButton>
                           </Tooltip>
@@ -439,7 +480,7 @@ export const DebtList = () => {
           There is no debt to show {":("}
         </p>
       )}
-    </Card>
+      </Card>
     </>
   );
 };
